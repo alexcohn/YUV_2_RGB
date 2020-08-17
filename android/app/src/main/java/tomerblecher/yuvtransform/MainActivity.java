@@ -8,6 +8,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -56,6 +58,13 @@ public class MainActivity extends FlutterActivity {
 
                                         total_rotation += new Date().getTime() - startTime;
                                         Log.i("flutter ", "yuv_transform rotated Jpeg " + height + "x" + width + " in " + (new Date().getTime() - startTime) + " ms, average Jpeg "  + (total_rotation-total_conversion)/total_calls);
+
+                                        if (total_calls == 20) {
+                                            FileOutputStream jpg = new FileOutputStream(new File(getCacheDir(), "rotated.jpg"));
+                                            jpg.write(outputStreamCompressed.toByteArray());
+                                            jpg.close();
+                                            Log.i("flutter ", "yuv_transform rotated Jpeg saved to " + new File(getCacheDir(), "rotated.jpg"));
+                                        }
 
                                         result.success(outputStreamCompressed.toByteArray());
                                         outputStreamCompressed.close();
