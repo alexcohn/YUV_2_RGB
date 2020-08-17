@@ -15,6 +15,10 @@ A [MethodChanel](https://flutter.dev/docs/development/platform-integration/platf
 The conversion speed depends on the phone itself + the quality you chose for the CameraController.  
 Here are the results for 2 different physical devices tested:
 
+* Nokia 4.2:
+  * *medium*: 720x480 **60-90** ms yuv->rgb: 35 ms rotated jpeg: 28 ms
+  * *max*: 1280x720 **200** ms yuv->rgb: 63 ms rotated jpeg: 80 ms
+
 * Redmi Note 4:
   * *Low quality*: **~0.03-0.06** Seconds.
   * *Medium quality*: **~0.1-0.14** Seconds.
