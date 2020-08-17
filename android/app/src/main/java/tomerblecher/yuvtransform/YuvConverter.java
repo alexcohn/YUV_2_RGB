@@ -54,6 +54,58 @@ public class YuvConverter {
     }
 
     /**
+     * Converts an YUV_420 image into Bitmap.
+     * @param planes  List of Bytes list
+     * @param strides contains the strides of each plane. The structure :
+     *                strideRowFirstPlane, stridePixelFirstPlane,
+     *                strideRowSecondPlane, stridePixelSecondPlane,
+     *                strideRowThirdPlane, stridePixelThirdPlane,
+     * @param width Width of the image.
+     * @param height Height of the image.
+     * @return RGBA_8888 Bitmap image.
+     *
+     * assuptions:
+     *   stride[0] (Y_line) >= width
+     *   stride[1] (Y_pixel) == 1
+     *   stride[2] (U_line) >= width
+     *   stride[3] (U_pixel) == 2
+     *   stride[4] (V_line) == U_line
+     *   stride[5] (V_pixel) == U_pixel
+     */
+    public static Bitmap YUV420toRGB(Context ctx, List<byte[]> planes, int[] strides, int width, int height) {
+        RenderScript rs = RenderScript.create(ctx);
+        Type.Builder yBuilder = new Type.Builder(rs, Element.U8(rs)).setX(planes.get(0).length);
+        Allocation allocY = Allocation.createTyped(rs, yBuilder.create(), Allocation.USAGE_SCRIPT);
+        Type.Builder uvBuilder = new Type.Builder(rs, Element.U8(rs)).setX(planes.get(1).length);
+        Allocation allocU = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
+        Allocation allocV = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
+        Type rgbType = Type.createXY(rs, Element.RGBA_8888(rs), width, height);
+        Allocation allocOut = Allocation.createTyped(rs, rgbType, Allocation.USAGE_SCRIPT);
+
+        ScriptC_yuv2rgb scriptC_yuv2rgb = new ScriptC_yuv2rgb(rs);
+        allocY.copyFrom(planes.get(0));
+        allocU.copyFrom(planes.get(1));
+        allocV.copyFrom(planes.get(2));
+        scriptC_yuv2rgb.set_Width(width);
+        scriptC_yuv2rgb.set_Height(height);
+        scriptC_yuv2rgb.set_Yline(strides[0]);
+        scriptC_yuv2rgb.set_UVline(strides[2]);
+        scriptC_yuv2rgb.set_Yplane(allocY);
+        scriptC_yuv2rgb.set_Uplane(allocU);
+        scriptC_yuv2rgb.set_Vplane(allocV);
+        scriptC_yuv2rgb.forEach_YUV420toRGB(allocOut);
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        allocOut.copyTo(bmp);
+
+        allocY.destroy();
+        allocU.destroy();
+        allocV.destroy();
+        scriptC_yuv2rgb.destroy();
+        return bmp;
+    }
+
+    /**
      * Format YUV_420 planes in to NV21.
      * Removes strides from planes and combines the result to single NV21 byte array.
      * @param planes  List of Bytes list

@@ -42,15 +42,21 @@ public class MainActivity extends FlutterActivity {
                                     int height = call.argument("height");
 
                                     if (total_calls == 0) {
+                                        Log.w("flutter ", "row   strides " + strides[0] + ", " + strides[2] + ", " + strides[4]);
+                                        Log.w("flutter ", "pixel strides " + strides[1] + ", " + strides[3] + ", " + strides[5]);
+                                        Log.w("flutter ", "plane 0 " + bytesList.get(0).length + " " + strides[0] * height);
+                                        Log.w("flutter ", "plane 1 " + bytesList.get(1).length + " " + strides[2] * height/2);
+                                        Log.w("flutter ", "plane 2 " + bytesList.get(2).length + " " + strides[4] * height/2);
+
                                         Date start = new Date();
-                                        YuvConverter.NV21toRGB(this, YuvConverter.YUVtoNV21(bytesList, strides, width, height), width, height);
+                                        YuvConverter.YUV420toRGB(this, bytesList, strides, width, height);
                                         Log.i("flutter ", "yuv_transform init renedscript in " + ((new Date().getTime() - start.getTime())) + " ms");
                                     }
 
                                     total_calls += 1;
                                     long startTime = new Date().getTime();
                                     try {
-                                        Bitmap bitmapRaw = YuvConverter.NV21toRGB(this, YuvConverter.YUVtoNV21(bytesList, strides, width, height), width, height);
+                                        Bitmap bitmapRaw = YuvConverter.YUV420toRGB(this, bytesList, strides, width, height);
 
                                         total_conversion += new Date().getTime() - startTime;
                                         Log.i("flutter ", "yuv_transform bitmap " + width + "x" + height + " in " + (new Date().getTime() - startTime) + " ms, average "  + total_conversion/total_calls);
