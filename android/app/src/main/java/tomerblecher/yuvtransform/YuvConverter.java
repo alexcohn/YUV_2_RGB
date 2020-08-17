@@ -1,8 +1,8 @@
 package tomerblecher.yuvtransform;
 
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
+import android.content.Context;
+import android.graphics.*;
+import android.renderscript.*;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -22,6 +22,35 @@ public class YuvConverter {
         YuvImage yuv = new YuvImage(nv21, ImageFormat.NV21, width, height, null);
         yuv.compressToJpeg(new Rect(0, 0, width, height), quality, out);
         return out.toByteArray();
+    }
+
+    /**
+     * Converts an NV21 image into Bitmap.
+     * @param nv21 byte[] of the input image in NV21 format
+     * @param width Width of the image.
+     * @param height Height of the image.
+     * @return RGBA_8888 Bitmap image.
+     */
+    public static Bitmap NV21toRGB(Context ctx, byte[] nv21, int width, int height) {
+        RenderScript rs = RenderScript.create(ctx);
+        Type.Builder yuvBlder = new Type.Builder(rs, Element.U8(rs)).setX(width).setY(height*3/2);
+        Allocation allocIn = Allocation.createTyped(rs, yuvBlder.create(), Allocation.USAGE_SCRIPT);
+        Type rgbType = Type.createXY(rs, Element.RGBA_8888(rs), width, height);
+        Allocation allocOut = Allocation.createTyped(rs, rgbType, Allocation.USAGE_SCRIPT);
+
+        ScriptC_yuv2rgb scriptC_yuv2rgb = new ScriptC_yuv2rgb(rs);
+        allocIn.copyFrom(nv21);
+        scriptC_yuv2rgb.set_Width(width);
+        scriptC_yuv2rgb.set_Height(height);
+        scriptC_yuv2rgb.set_NV21(allocIn);
+        scriptC_yuv2rgb.forEach_NV21toRGB(allocOut);
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        allocOut.copyTo(bmp);
+
+        allocIn.destroy();
+        scriptC_yuv2rgb.destroy();
+        return bmp;
     }
 
     /**

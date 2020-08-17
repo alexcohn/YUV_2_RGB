@@ -41,11 +41,16 @@ public class MainActivity extends FlutterActivity {
                                     int width = call.argument("width");
                                     int height = call.argument("height");
 
+                                    if (total_calls == 0) {
+                                        Date start = new Date();
+                                        YuvConverter.NV21toRGB(this, YuvConverter.YUVtoNV21(bytesList, strides, width, height), width, height);
+                                        Log.i("flutter ", "yuv_transform init renedscript in " + ((new Date().getTime() - start.getTime())) + " ms");
+                                    }
+
                                     total_calls += 1;
                                     long startTime = new Date().getTime();
                                     try {
-                                        byte[] data = YuvConverter.NV21toJPEG(YuvConverter.YUVtoNV21(bytesList, strides, width, height), width, height, 100);
-                                        Bitmap bitmapRaw = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                        Bitmap bitmapRaw = YuvConverter.NV21toRGB(this, YuvConverter.YUVtoNV21(bytesList, strides, width, height), width, height);
 
                                         total_conversion += new Date().getTime() - startTime;
                                         Log.i("flutter ", "yuv_transform bitmap " + width + "x" + height + " in " + (new Date().getTime() - startTime) + " ms, average "  + total_conversion/total_calls);
@@ -68,7 +73,6 @@ public class MainActivity extends FlutterActivity {
 
                                         result.success(outputStreamCompressed.toByteArray());
                                         outputStreamCompressed.close();
-                                        data = null;
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }

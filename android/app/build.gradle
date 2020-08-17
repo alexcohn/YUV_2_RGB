@@ -39,6 +39,7 @@ android {
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        renderscriptTargetApi 21
     }
 
     buildTypes {
