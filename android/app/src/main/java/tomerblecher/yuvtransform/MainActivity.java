@@ -1,7 +1,6 @@
 package tomerblecher.yuvtransform;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.util.Log;
 
@@ -25,6 +24,7 @@ public class MainActivity extends FlutterActivity {
     private static final String CHANNEL = "tomer.blecher.yuv_transform/yuv";
     private long total_conversion = 0;
     private long total_rotation = 0;
+    private long total_jpeg = 0;
     private long total_calls = 0;
 
     @Override
@@ -58,19 +58,25 @@ public class MainActivity extends FlutterActivity {
                                     try {
                                         Bitmap bitmapRaw = YuvConverter.YUV420toRGB(this, bytesList, strides, width, height);
 
-                                        total_conversion += new Date().getTime() - startTime;
+                                        long conversion = new Date().getTime() - startTime;
+                                        total_conversion += conversion;
                                         Log.i("flutter ", "yuv_transform bitmap " + width + "x" + height + " in " + (new Date().getTime() - startTime) + " ms, average "  + total_conversion/total_calls);
 
                                         Matrix matrix = new Matrix();
                                         matrix.postRotate(90);
                                         Bitmap finalbitmap = Bitmap.createBitmap(bitmapRaw, 0, 0, bitmapRaw.getWidth(), bitmapRaw.getHeight(), matrix, true);
+
+                                        total_rotation += new Date().getTime() - startTime;
+                                        Log.i("flutter ", "yuv_transform rotated bitmap " + height + "x" + width + " in " + (new Date().getTime() - startTime - conversion) + " ms, average "  + (total_rotation-total_conversion)/total_calls);
+
+                                        long ts = new Date().getTime();
                                         ByteArrayOutputStream outputStreamCompressed = new ByteArrayOutputStream();
                                         finalbitmap.compress(Bitmap.CompressFormat.JPEG, 60, outputStreamCompressed);
 
-                                        total_rotation += new Date().getTime() - startTime;
-                                        Log.i("flutter ", "yuv_transform rotated Jpeg " + height + "x" + width + " in " + (new Date().getTime() - startTime) + " ms, average Jpeg "  + (total_rotation-total_conversion)/total_calls);
+                                        total_jpeg += new Date().getTime() - startTime;
+                                        Log.i("flutter ", "yuv_transform jpeg compression " + (new Date().getTime()-ts) + " average " + (total_jpeg-total_rotation)/total_calls + " ms");
 
-                                        if (total_calls == 20) {
+                                        if (total_calls == -20) {
                                             FileOutputStream jpg = new FileOutputStream(new File(getCacheDir(), "rotated.jpg"));
                                             jpg.write(outputStreamCompressed.toByteArray());
                                             jpg.close();

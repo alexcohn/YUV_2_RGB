@@ -16,18 +16,18 @@ The conversion speed depends on the phone itself + the quality you chose for the
 Here are the results for 3 different physical devices tested:
 
 * Nokia 4.2:
-  * *medium*: 720x480 **60-90** ms yuv->rgb: 35 ms rotated jpeg: 28 ms
-  * *high*: 1280x720 **200** ms yuv->rgb: 63 ms rotated jpeg: 80 ms
+  * *medium*: 720x480 **60-90** ms yuv->rgb: 35 ms
+  * *high*: 1280x720 **200** ms yuv->rgb: 63 ms
 
 * Nokia 4.2 with NV21toRGB (after initialization):
-  * *medium*: 720x480 **60-90** ms yuv->rgb: **18** ms rotated jpeg: **39** ms
-  * *high*: 1280x720 **170** ms yuv->rgb: **27** ms rotated jpeg: **100** ms
-  * *veryHigh*: 1920x1080 **400** ms yuv->rgb: **55** ms rotated jpeg: **208** ms
+  * *medium*: 720x480 **60-90** ms yuv->rgb: **18** ms
+  * *high*: 1280x720 **170** ms yuv->rgb: **27** ms
+  * *veryHigh*: 1920x1080 **400** ms yuv->rgb: **55** ms
 
 * Nokia 4.2 with YUB420toRGB (after initialization):
-  * *medium*: 720x480 **60-90** ms yuv->rgb: **18** ms rotated jpeg: **39** ms
-  * *high*: 1280x720 **170** ms yuv->rgb: **26** ms rotated jpeg: **106** ms
-  * *veryHigh*: 1920x1080 **280** ms yuv->rgb: **50** ms rotated jpeg: **210** ms
+  * *medium*: 720x480 **60-90** ms yuv->rgb: **18** ms bitmap rotation: **39** ms
+  * *high*: 1280x720 **170** ms yuv->rgb: **26** ms bitmap rotation: **106** ms
+  * *veryHigh*: 1920x1080 **280** ms yuv->rgb: **50** ms; bitmap rotation: **166** ms; Jpeg compression **68** ms
 
 > to get *veryHigh* resolution, I disabled the [cap at *high* in `computeBestPreviewSize()`](https://github.com/mklim/plugins/blob/master/packages/camera/android/src/main/java/io/flutter/plugins/camera/CameraUtils.java#L28).
 
