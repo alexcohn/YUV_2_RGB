@@ -63,7 +63,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     }
     controller = CameraController(
       cameraDescription,
-      ResolutionPreset.medium,
+      ResolutionPreset.veryHigh,
       enableAudio: false,
     );
 

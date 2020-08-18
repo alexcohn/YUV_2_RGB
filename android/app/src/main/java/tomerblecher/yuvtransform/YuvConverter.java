@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class YuvConverter {
+public class YuvConverter implements AutoCloseable {
     /**
      * Converts an NV21 image into JPEG compressed.
      * @param nv21 byte[] of the input image in NV21 format
@@ -174,6 +174,51 @@ public class YuvConverter {
         }
         return data;
 
+    }
+
+    // non-static API
+
+    private RenderScript rs;
+    private ScriptC_yuv2rgb scriptC_yuv2rgb;
+
+    YuvConverter(Context ctx) {
+        rs = RenderScript.create(ctx);
+        scriptC_yuv2rgb = new ScriptC_yuv2rgb(rs);
+    }
+
+    public void close() {
+        scriptC_yuv2rgb.destroy();
+    }
+
+    public Bitmap YUV420toRGB(byte[] yPlane, byte[] uPlane, byte[] vPlane,
+                              int yLine, int uLine, int width, int height) {
+        Type.Builder yBuilder = new Type.Builder(rs, Element.U8(rs)).setX(yPlane.length);
+        Allocation allocY = Allocation.createTyped(rs, yBuilder.create(), Allocation.USAGE_SCRIPT);
+        Type.Builder uvBuilder = new Type.Builder(rs, Element.U8(rs)).setX(uPlane.length);
+        Allocation allocU = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
+        Allocation allocV = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
+        Type rgbType = Type.createXY(rs, Element.RGBA_8888(rs), width, height);
+        Allocation allocOut = Allocation.createTyped(rs, rgbType, Allocation.USAGE_SCRIPT);
+
+        allocY.copyFrom(yPlane);
+        allocU.copyFrom(uPlane);
+        allocV.copyFrom(vPlane);
+        scriptC_yuv2rgb.set_Width(width);
+        scriptC_yuv2rgb.set_Height(height);
+        scriptC_yuv2rgb.set_Yline(yLine);
+        scriptC_yuv2rgb.set_UVline(uLine);
+        scriptC_yuv2rgb.set_Yplane(allocY);
+        scriptC_yuv2rgb.set_Uplane(allocU);
+        scriptC_yuv2rgb.set_Vplane(allocV);
+        scriptC_yuv2rgb.forEach_YUV420toRGB(allocOut);
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        allocOut.copyTo(bmp);
+
+        allocY.destroy();
+        allocU.destroy();
+        allocV.destroy();
+        return bmp;
     }
 
 }

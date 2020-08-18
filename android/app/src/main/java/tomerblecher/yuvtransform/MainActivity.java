@@ -2,9 +2,11 @@ package tomerblecher.yuvtransform;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -26,6 +28,19 @@ public class MainActivity extends FlutterActivity {
     private long total_rotation = 0;
     private long total_jpeg = 0;
     private long total_calls = 0;
+    private YuvConverter yuvConverter;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        yuvConverter = new YuvConverter(getApplicationContext());
+    }
+
+    @Override
+    protected void onDestroy() {
+        yuvConverter.close();
+        super.onDestroy();
+    }
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -48,15 +63,24 @@ public class MainActivity extends FlutterActivity {
                                         Log.w("flutter ", "plane 1 " + bytesList.get(1).length + " " + strides[2] * height/2);
                                         Log.w("flutter ", "plane 2 " + bytesList.get(2).length + " " + strides[4] * height/2);
 
-                                        Date start = new Date();
-                                        YuvConverter.YUV420toRGB(this, bytesList, strides, width, height);
-                                        Log.i("flutter ", "yuv_transform init renedscript in " + ((new Date().getTime() - start.getTime())) + " ms");
+                                        long start = new Date().getTime();
+                                        yuvConverter = new YuvConverter(getApplicationContext());
+                                        Log.i("flutter ", "yuv_transform init YuvConverter in " + ((new Date().getTime() - start)) + " ms");
                                     }
 
                                     total_calls += 1;
                                     long startTime = new Date().getTime();
                                     try {
-                                        Bitmap bitmapRaw = YuvConverter.YUV420toRGB(this, bytesList, strides, width, height);
+                                        /*
+                                         * hardcoded assuptions:
+                                         *   stride[0] (yLine) >= width
+                                         *   stride[1] (yPixel) == 1
+                                         *   stride[2] (uLine) >= width
+                                         *   stride[3] (uPixel) == 2
+                                         *   stride[4] (vLine) == uLine
+                                         *   stride[5] (vPixel) == uPixel
+                                         */
+                                        Bitmap bitmapRaw = yuvConverter.YUV420toRGB(bytesList.get(0), bytesList.get(1), bytesList.get(2), strides[0], strides[2], width, height);
 
                                         long conversion = new Date().getTime() - startTime;
                                         total_conversion += conversion;

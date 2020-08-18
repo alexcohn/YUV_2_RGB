@@ -29,6 +29,11 @@ Here are the results for 3 different physical devices tested:
   * *high*: 1280x720 **170** ms yuv->rgb: **26** ms bitmap rotation: **106** ms
   * *veryHigh*: 1920x1080 **280** ms yuv->rgb: **50** ms; bitmap rotation: **166** ms; Jpeg compression **68** ms
 
+* Nokia 4.2 with YUB420toRGB (non-static):
+  * *medium*: 720x480 **60-90** ms yuv->rgb: **12** ms; bitmap rotation: **24** ms; Jpeg compression **11** ms
+  * *high*: 1280x720 **170** ms yuv->rgb: **20** ms; bitmap rotation: **70** ms; Jpeg compression **26** ms
+  * *veryHigh*: 1920x1080 **280** ms yuv->rgb: **40** ms; bitmap rotation: **145** ms; Jpeg compression **56** ms
+
 > to get *veryHigh* resolution, I disabled the [cap at *high* in `computeBestPreviewSize()`](https://github.com/mklim/plugins/blob/master/packages/camera/android/src/main/java/io/flutter/plugins/camera/CameraUtils.java#L28).
 
 * Redmi Note 4:
