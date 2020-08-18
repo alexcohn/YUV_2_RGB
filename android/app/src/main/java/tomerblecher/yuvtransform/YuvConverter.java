@@ -181,24 +181,46 @@ public class YuvConverter implements AutoCloseable {
     private RenderScript rs;
     private ScriptC_yuv2rgb scriptC_yuv2rgb;
 
-    YuvConverter(Context ctx) {
+    YuvConverter(Context ctx, int ySize, int uvSize, int width, int height) {
         rs = RenderScript.create(ctx);
         scriptC_yuv2rgb = new ScriptC_yuv2rgb(rs);
+        init(ySize, uvSize, width, height);
     }
 
+    private Allocation allocY, allocU, allocV, allocOut;
+
+    @Override
     public void close() {
+        if (allocY != null) allocY.destroy();
+        if (allocU != null) allocU.destroy();
+        if (allocV != null) allocV.destroy();
+        if (allocOut != null) allocOut.destroy();
         scriptC_yuv2rgb.destroy();
+    }
+
+    private void init(int ySize, int uvSize, int width, int height) {
+        if (allocY == null || allocY.getBytesSize() != ySize) {
+            if (allocY != null) allocY.destroy();
+            Type.Builder yBuilder = new Type.Builder(rs, Element.U8(rs)).setX(ySize);
+            allocY = Allocation.createTyped(rs, yBuilder.create(), Allocation.USAGE_SCRIPT);
+        }
+        if (allocU == null || allocU.getBytesSize() != uvSize || allocV == null || allocV.getBytesSize() != uvSize ) {
+            if (allocU != null) allocU.destroy();
+            if (allocV != null) allocV.destroy();
+            Type.Builder uvBuilder = new Type.Builder(rs, Element.U8(rs)).setX(uvSize);
+            allocU = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
+            allocV = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
+        }
+        if (allocOut == null || allocOut.getBytesSize() != width*height*4) {
+            Type rgbType = Type.createXY(rs, Element.RGBA_8888(rs), width, height);
+            if (allocOut != null) allocOut.destroy();
+            allocOut = Allocation.createTyped(rs, rgbType, Allocation.USAGE_SCRIPT);
+        }
     }
 
     public Bitmap YUV420toRGB(byte[] yPlane, byte[] uPlane, byte[] vPlane,
                               int yLine, int uLine, int width, int height) {
-        Type.Builder yBuilder = new Type.Builder(rs, Element.U8(rs)).setX(yPlane.length);
-        Allocation allocY = Allocation.createTyped(rs, yBuilder.create(), Allocation.USAGE_SCRIPT);
-        Type.Builder uvBuilder = new Type.Builder(rs, Element.U8(rs)).setX(uPlane.length);
-        Allocation allocU = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
-        Allocation allocV = Allocation.createTyped(rs, uvBuilder.create(), Allocation.USAGE_SCRIPT);
-        Type rgbType = Type.createXY(rs, Element.RGBA_8888(rs), width, height);
-        Allocation allocOut = Allocation.createTyped(rs, rgbType, Allocation.USAGE_SCRIPT);
+        init(yPlane.length, uPlane.length, width, height);
 
         allocY.copyFrom(yPlane);
         allocU.copyFrom(uPlane);
@@ -210,14 +232,14 @@ public class YuvConverter implements AutoCloseable {
         scriptC_yuv2rgb.set_Yplane(allocY);
         scriptC_yuv2rgb.set_Uplane(allocU);
         scriptC_yuv2rgb.set_Vplane(allocV);
-        scriptC_yuv2rgb.forEach_YUV420toRGB(allocOut);
+        if (width > height) // landscape
+            scriptC_yuv2rgb.forEach_YUV420toRGB(allocOut);
+        else
+            scriptC_yuv2rgb.forEach_YUV420toRGB_rotated(allocOut);
 
         Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         allocOut.copyTo(bmp);
 
-        allocY.destroy();
-        allocU.destroy();
-        allocV.destroy();
         return bmp;
     }
 

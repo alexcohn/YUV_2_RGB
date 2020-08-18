@@ -30,3 +30,12 @@ uchar4 __attribute__((kernel)) YUV420toRGB(uint32_t x, uint32_t y)
     uchar4 rgb = rsYuvToRGBA_uchar4(Y, U, V);
     return rgb;
 }
+
+uchar4 __attribute__((kernel)) YUV420toRGB_rotated(uint32_t x, uint32_t y)
+{
+    uchar Y = rsGetElementAt_uchar(Yplane, (Width-x-1)*Yline + y);
+    uchar V = rsGetElementAt_uchar(Vplane, ((Width-x-1)/2)*UVline + (y & ~1));
+    uchar U = rsGetElementAt_uchar(Uplane, ((Width-x-1)/2)*UVline + (y & ~1));
+    uchar4 rgb = rsYuvToRGBA_uchar4(Y, U, V);
+    return rgb;
+}

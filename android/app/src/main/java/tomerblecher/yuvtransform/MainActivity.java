@@ -33,7 +33,6 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        yuvConverter = new YuvConverter(getApplicationContext());
     }
 
     @Override
@@ -64,7 +63,7 @@ public class MainActivity extends FlutterActivity {
                                         Log.w("flutter ", "plane 2 " + bytesList.get(2).length + " " + strides[4] * height/2);
 
                                         long start = new Date().getTime();
-                                        yuvConverter = new YuvConverter(getApplicationContext());
+                                        yuvConverter = new YuvConverter(getApplicationContext(), bytesList.get(0).length, bytesList.get(1).length, height, width);
                                         Log.i("flutter ", "yuv_transform init YuvConverter in " + ((new Date().getTime() - start)) + " ms");
                                     }
 
@@ -80,22 +79,18 @@ public class MainActivity extends FlutterActivity {
                                          *   stride[4] (vLine) == uLine
                                          *   stride[5] (vPixel) == uPixel
                                          */
-                                        Bitmap bitmapRaw = yuvConverter.YUV420toRGB(bytesList.get(0), bytesList.get(1), bytesList.get(2), strides[0], strides[2], width, height);
+                                        Bitmap bitmapRaw = yuvConverter.YUV420toRGB(bytesList.get(0), bytesList.get(1), bytesList.get(2), strides[0], strides[2], height, width);
 
                                         long conversion = new Date().getTime() - startTime;
                                         total_conversion += conversion;
                                         Log.i("flutter ", "yuv_transform bitmap " + width + "x" + height + " in " + (new Date().getTime() - startTime) + " ms, average "  + total_conversion/total_calls);
-
-                                        Matrix matrix = new Matrix();
-                                        matrix.postRotate(90);
-                                        Bitmap finalbitmap = Bitmap.createBitmap(bitmapRaw, 0, 0, bitmapRaw.getWidth(), bitmapRaw.getHeight(), matrix, true);
 
                                         total_rotation += new Date().getTime() - startTime;
                                         Log.i("flutter ", "yuv_transform rotated bitmap " + height + "x" + width + " in " + (new Date().getTime() - startTime - conversion) + " ms, average "  + (total_rotation-total_conversion)/total_calls);
 
                                         long ts = new Date().getTime();
                                         ByteArrayOutputStream outputStreamCompressed = new ByteArrayOutputStream();
-                                        finalbitmap.compress(Bitmap.CompressFormat.JPEG, 60, outputStreamCompressed);
+                                        bitmapRaw.compress(Bitmap.CompressFormat.JPEG, 60, outputStreamCompressed);
 
                                         total_jpeg += new Date().getTime() - startTime;
                                         Log.i("flutter ", "yuv_transform jpeg compression " + (new Date().getTime()-ts) + " average " + (total_jpeg-total_rotation)/total_calls + " ms");
