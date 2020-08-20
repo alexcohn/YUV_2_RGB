@@ -15,31 +15,29 @@ A [MethodChanel](https://flutter.dev/docs/development/platform-integration/platf
 The conversion speed depends on the phone itself + the quality you chose for the CameraController.  
 Here are the results for 3 different physical devices tested:
 
-* Nokia 4.2 [original](https://github.com/alexcohn/YUV_2_RGB/commit/909afee5062843e18f2fb9d3ea6e5ac43ecb8fcc):
+* Nokia 4.2 [original](https://github.com/alexcohn/YUV_2_RGB/tree/909afee5062843e18f2fb9d3ea6e5ac43ecb8fcc):
   * *medium*: 720x480 **60-90** ms yuv->rgb: **35** ms
   * *high*: 1280x720 **200** ms yuv->rgb: **63** ms
 
-* Nokia 4.2 with [NV21toRGB (after initialization)](https://github.com/alexcohn/YUV_2_RGB/commit/8a0d7dae74356a0528604c1756131bff9f4a24a6):
+* Nokia 4.2 with [NV21toRGB (after initialization)](https://github.com/alexcohn/YUV_2_RGB/tree/8a0d7dae74356a0528604c1756131bff9f4a24a6):
   * *medium*: 720x480 **60-90** ms yuv->rgb: **18** ms
   * *high*: 1280x720 **170** ms yuv->rgb: **27** ms
   * *veryHigh*: 1920x1080 **400** ms yuv->rgb: **55** ms
 
-* Nokia 4.2 with [YUB420toRGB (after initialization)](https://github.com/alexcohn/YUV_2_RGB/commit/b3cee7d55e1497f4fc3802caaf9479326f4632b3):
+* Nokia 4.2 with [YUB420toRGB (after initialization)](https://github.com/alexcohn/YUV_2_RGB/tree/b3cee7d55e1497f4fc3802caaf9479326f4632b3):
   * *medium*: 720x480 **60-90** ms yuv->rgb: **18** ms bitmap rotation: **39** ms
   * *high*: 1280x720 **170** ms yuv->rgb: **26** ms bitmap rotation: **106** ms
   * *veryHigh*: 1920x1080 **280** ms yuv->rgb: **50** ms; bitmap rotation: **166** ms; Jpeg compression **68** ms
 
-* Nokia 4.2 with [YUB420toRGB (non-static)](https://github.com/alexcohn/YUV_2_RGB/commit/b59b62d6fd91836f43b6892bb358df282e4643db):
+* Nokia 4.2 with [YUB420toRGB (non-static)](https://github.com/alexcohn/YUV_2_RGB/tree/b59b62d6fd91836f43b6892bb358df282e4643db):
   * *medium*: 720x480 yuv->rgb: **9** ms; bitmap rotation: **24** ms; Jpeg compression **11** ms
   * *high*: 1280x720 yuv->rgb: **15** ms; bitmap rotation: **74** ms; Jpeg compression **26** ms
   * *veryHigh*: 1920x1080 yuv->rgb: **31** ms; bitmap rotation: **147** ms; Jpeg compression **58** ms
 
-* Nokia 4.2 with YUB420toRGB, with rotation:
-  * *medium*: 720x480 yuv->rgb with rotation: **11** ms; Jpeg compression **14** ms
-  * *high*: 1280x720 yuv->rgb with rotation: **15** ms; Jpeg compression **31** ms
-  * *veryHigh*: 1920x1080 yuv->rgb w: **36** ms; Jpeg compression **64** ms
-
-> to get *veryHigh* resolution, I disabled the [cap at *high* in `computeBestPreviewSize()`](https://github.com/mklim/plugins/blob/master/packages/camera/android/src/main/java/io/flutter/plugins/camera/CameraUtils.java#L28).
+* Nokia 4.2 with YUB420toRGB, [with rotation](https://github.com/alexcohn/YUV_2_RGB/tree/bf1b367a239f0f91e88f0456f36780a0642a5365):
+  * *medium*: 720x480 yuv->rgb: **11** ms; Jpeg compression **14** ms
+  * *high*: 1280x720 yuv->rgb: **15** ms; Jpeg compression **31** ms
+  * *veryHigh*: 1920x1080 yuv->rgb: **32** ms; Jpeg compression **64** ms
 
 * Redmi Note 4:
   * *Low quality*: **~0.03-0.06** Seconds.
@@ -77,6 +75,5 @@ Those are the values for each entry as shown in the [official flutter site](http
 * ultraHigh → 2160p (3840x2160)
 * max → The highest resolution available.
 
-
-
+To get *veryHigh* resolution or more, disable the [cap at *high* in `computeBestPreviewSize()`](https://github.com/mklim/plugins/blob/master/packages/camera/android/src/main/java/io/flutter/plugins/camera/CameraUtils.java#L28).
 

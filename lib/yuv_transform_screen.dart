@@ -28,7 +28,10 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     _subscription.add(_imageResultProcessorService.queue.listen((event) {
       _isProcessing = false;
     }));
-    onNewCameraSelected(cameras[cameraType]);
+    for (CameraDescription camera in  cameras) {
+      print("${camera.lensDirection} orientation: ${camera.sensorOrientation}");
+    }
+    onNewCameraSelected(cameras[0]);
   }
 
   @override
@@ -63,7 +66,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     }
     controller = CameraController(
       cameraDescription,
-      ResolutionPreset.veryHigh,
+      ResolutionPreset.medium,
       enableAudio: false,
     );
 
