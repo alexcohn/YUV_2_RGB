@@ -103,18 +103,16 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
 
   @override
   Widget build(BuildContext context) {
+    print('yuv_transform Build ${context.size} ${context.size.aspectRatio}');
     return SafeArea(
-        child: Scaffold(
-            body: Stack(children: <Widget>[
-      Column(
-        children: <Widget>[
-          Expanded(
-            child: CameraScreenWidget(
-              controller: controller,
-            ),
-          ),
-        ],
+      child: new Transform.scale(
+        scale: 1 / controller.value.aspectRatio,
+        child: new Center(
+          child: CameraScreenWidget(
+            controller: controller
+          )
+        )
       )
-    ])));
+    );
   }
 }
