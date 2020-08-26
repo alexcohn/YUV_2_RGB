@@ -49,7 +49,7 @@ public class MainActivity extends FlutterActivity {
                         (call, result) -> {
                             switch (call.method) {
                                 case "yuv_transform": {
-                                    List<byte[]> bytesList = call.argument("platforms");
+                                    List<byte[]> bytesList = call.argument("planes");
                                     int[] strides = call.argument("strides");
                                     int width = call.argument("width");
                                     int height = call.argument("height");
@@ -62,7 +62,7 @@ public class MainActivity extends FlutterActivity {
                                         Log.w("flutter ", "plane 2 " + bytesList.get(2).length + " " + strides[4] * height/2);
 
                                         long start = new Date().getTime();
-                                        yuvConverter = new YuvConverter(getApplicationContext(), bytesList.get(0).length, bytesList.get(1).length, height, width);
+                                        yuvConverter = new YuvConverter(getApplicationContext(), bytesList.get(0).length, bytesList.get(1) == null ? 0 : bytesList.get(1).length, height, width);
                                         Log.i("flutter ", "yuv_transform init YuvConverter in " + ((new Date().getTime() - start)) + " ms");
                                     }
 

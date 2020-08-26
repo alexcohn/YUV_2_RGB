@@ -17,7 +17,7 @@ class YuvChannelling {
     int index = 0;
     // We need to transform the image to Uint8List so that the native code could
     // transform it to byte[]
-    List<Uint8List> data = image.planes.map((plane) {
+    List<Uint8List> planes = image.planes.map((plane) {
       strides[index] = (plane.bytesPerRow);
       index++;
       strides[index] = (plane.bytesPerPixel);
@@ -25,7 +25,7 @@ class YuvChannelling {
       return plane.bytes;
     }).toList();
     Uint8List image_jpeg = await platform.invokeMethod('yuv_transform', {
-      'platforms': data,
+      'planes': planes,
       'height': image.height,
       'width': image.width,
       'strides': strides
