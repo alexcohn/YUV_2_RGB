@@ -12,11 +12,16 @@ class ImageResultProcessorService  {
   /// Observers that needs the result image should subscribe to this stream.
   Stream<Uint8List> get queue => _queue.stream;
 
+  num lastTimeStamp = 0;
+  num frameCount = 0;
+
   addRawImage(CameraImage cameraImage) async {
-    num sTime = DateTime.now().millisecondsSinceEpoch;
+    frameCount += 1;
+    num newTimeStamp = DateTime.now().millisecondsSinceEpoch;
     Uint8List imgJpeg = await _yuvChannelling.yuv_transform(cameraImage);
-    print("Job took ${(DateTime.now().millisecondsSinceEpoch - sTime)/1000} seconds to complete.");
     _queue.sink.add(imgJpeg);
+    print("Job ${frameCount} took ${DateTime.now().millisecondsSinceEpoch - newTimeStamp} ms to complete" + (lastTimeStamp > 0 ? ", at ${(1000.0/(newTimeStamp-lastTimeStamp)).toStringAsFixed(1)} fps" : ""));
+    lastTimeStamp = newTimeStamp;
   }
 
   void dispose() {
