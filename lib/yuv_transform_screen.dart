@@ -8,6 +8,9 @@ import 'package:yuvtransform/service/image_result_processor_service.dart';
 
 import 'camera_screen.dart';
 
+/// Delay for image capture in stream. Should properly be in some sort of SettingsManager in a real project.
+const DELAY_TIME = 3000;
+
 class YuvTransformScreen extends StatefulWidget {
   @override
   _YuvTransformScreenState createState() => _YuvTransformScreenState();
@@ -18,6 +21,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
   List<StreamSubscription> _subscription = List();
   ImageResultProcessorService _imageResultProcessorService;
   bool _isProcessing = false;
+  var _capturedImage = new Image();
 
   @override
   void initState() {
@@ -27,6 +31,9 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     WidgetsBinding.instance.addObserver(this);
     _subscription.add(_imageResultProcessorService.queue.listen((event) {
       _isProcessing = false;
+      setState(() {
+        _capturedImage = Image.memory(event, width: 180, height: 180);
+      });
     }));
     for (CameraDescription camera in  cameras) {
       print("${camera.lensDirection} orientation: ${camera.sensorOrientation}");
@@ -103,14 +110,17 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
 
   @override
   Widget build(BuildContext context) {
-    print('yuv_transform Build ${context.size} ${context.size.aspectRatio}');
-    return SafeArea(
-      child: new Transform.scale(
-        scale: 1 / controller.value.aspectRatio,
-        child: new Center(
-          child: CameraScreenWidget(
-            controller: controller
-          )
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget> [
+        CameraScreenWidget(
+          controller: controller
+        ),
+        Positioned(
+          bottom: 0,
+          width: 180,
+          height: 180,
+          child: _capturedImage,
         )
       )
     );
