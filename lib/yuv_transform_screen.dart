@@ -105,7 +105,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     _isProcessing = true;
     print("Sent a new image and sleeping for: $DELAY_TIME");
     await Future.delayed(Duration(milliseconds: DELAY_TIME),
-        () => _imageResultProcessorService.addRawImage(image));
+        () => _imageResultProcessorService.addRawImage(image, luminanceOnly: true));
   }
 
   @override
@@ -122,7 +122,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
           height: 180,
           child: _capturedImage,
         )
-      )
+      ]
     );
   }
 }

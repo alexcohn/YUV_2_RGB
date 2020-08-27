@@ -1,11 +1,16 @@
 # YUV -> RGB Conversion in Flutter
 
-Full working example of YUV to RGB conversion in Dart with native code(Java)
+Full working example of YUV to RGB conversion in Dart with native code (Java)
 
 ## Why is it needed?
 Personally, I encountered a problem while making a [real time recognition app](https://github.com/tomerblecher/fruit-recoginition-app), using a model i trained with the [FastAI](https://www.fast.ai/) library.  
 Since the library requires an RGBA image type for prediction, and the [Camera](https://pub.dev/packages/camera) plugin produces YUV images, i got stuck for a few days searching for efficient conversion solution.  
 After reading a lot of half working examples of people stuck in the same situation as I, and with a lot of trial and error, I managed to get a decent solution for my purposes.
+
+Performance of real-time image acquisition in Flutter is bad, at least on Android.
+It's no surprise that the framework [caps](https://github.com/mklim/plugins/blob/master/packages/camera/android/src/main/java/io/flutter/plugins/camera/CameraUtils.java#L28)
+the resolution at  at 720p.
+The penalty we must pay to pass an image from the camera to a neural network is high. It is comprised of several steps. First, we
 
 ## The solution in brief
 After trying a few examples, the best solution seemed to be using native code(Java) to convert the image.
@@ -35,9 +40,17 @@ Here are the results for 3 different physical devices tested:
   * *veryHigh*: 1920x1080 yuv->rgb: **31** ms; bitmap rotation: **147** ms; Jpeg compression **58** ms
 
 * Nokia 4.2 with YUB420toRGB, [with rotation](https://github.com/alexcohn/YUV_2_RGB/tree/bf1b367a239f0f91e88f0456f36780a0642a5365):
-  * *medium*: 720x480 yuv->rgb: **11** ms; Jpeg compression **14** ms
-  * *high*: 1280x720 yuv->rgb: **15** ms; Jpeg compression **31** ms
-  * *veryHigh*: 1920x1080 yuv->rgb: **32** ms; Jpeg compression **64** ms
+  * *medium*: 720x480 yuv->rgb: **11** ms; Jpeg compression **14** ms; prepare **2** ms; call to Flutter **5** ms
+  * *high*: 1280x720 yuv->rgb: **15** ms; Jpeg compression **31** ms; prepare **3** ms; call to Flutter **12** ms
+  * *veryHigh*: 1920x1080 yuv->rgb: **32** ms; Jpeg compression **64** ms; prepare **10** ms; call to Flutter **26** ms
+
+ * Nokia 4.2 [using ffi](https://github.com/Hugand/camera_tutorial.git):
+  * *medium*: 720x480 yuv->rgb: **13** ms (with rotation).
+  * *high*: 1280x720 yuv->rgb: **33** ms (with rotation). Much better than Java, but needs **41** ms of preparation. (debug: **166** ms)
+
+ * Nokia 4.2 luminance only with [Image](https://github.com/brendan-duncan/image.git):
+  * *medium*: 720x480 Image.fromBytes **70** ms; encodeJpeg **210** ms (after patch)
+  * *high*: 1280x720 Image.fromBytes **110** ms; encodeJpeg **530** ms
 
 * Redmi Note 4:
   * *Low quality*: **~0.03-0.06** Seconds.
