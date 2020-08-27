@@ -23,7 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: ^0.5.8+2
+  camera: ## ^0.5.8+5
+    path: ../flutter-plugins/packages/camera
   ## permission handler
   permission_handler: ^5.0.0+hotfix.5
   ## Stream handler

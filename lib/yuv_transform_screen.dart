@@ -89,7 +89,10 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
       await controller.initialize();
 
       await controller
-          .startImageStream((CameraImage image) => _processCameraImage(image));
+          .startImageStream((CameraImage image) => _processCameraImage(image),
+//            rotation: 0,
+//            format: ImageFormatGroup.luminance,
+            );
     } on CameraException catch (e) {
       showCameraException(e);
     }
@@ -105,7 +108,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     _isProcessing = true;
     print("Sent a new image and sleeping for: $DELAY_TIME");
     await Future.delayed(Duration(milliseconds: DELAY_TIME),
-        () => _imageResultProcessorService.addRawImage(image, luminanceOnly: true));
+        () => _imageResultProcessorService.addRawImage(image));
   }
 
   @override
