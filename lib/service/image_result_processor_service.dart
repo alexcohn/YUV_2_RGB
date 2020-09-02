@@ -17,7 +17,7 @@ class ImageResultProcessorService  {
   num totalTime = 0;
   num frameCount = 0;
 
-  addRawImage(CameraImage cameraImage, { bool luminanceOnly = false}) async {
+  addCameraImage(CameraImage cameraImage, { bool luminanceOnly = false, bool compress = true, Rotation rotation = Rotation.ROTATION_90, }) async {
     frameCount += 1;
     num newTimeStamp = DateTime.now().millisecondsSinceEpoch;
     if (luminanceOnly) {
@@ -25,13 +25,27 @@ class ImageResultProcessorService  {
       ByteData bd = cameraImage.planes[0].bytes.buffer.asByteData(cameraImage.planes[0].bytes.offsetInBytes);
       num widx = 0;
 
-      num ridx = cameraImage.planes[0].bytes.offsetInBytes;
-      bmp = BMP8Header(cameraImage.width, cameraImage.height);
-      for (num row = 0; row < bmp.height; row++) {
-        num ridx = row * cameraImage.planes[0].bytesPerRow;
-        for (num col = 0; col < bmp.width; col++) {
-          bmp.bd.setUint8(widx++, bd.getUint8(ridx++));
-        }
+      switch (rotation) {
+        case Rotation.ROTATION_0:
+          bmp = BMP8Header(cameraImage.width, cameraImage.height);
+          for (num row = 0; row < bmp.height; row++) {
+            num ridx = row * cameraImage.planes[0].bytesPerRow;
+            for (num col = 0; col < bmp.width; col++) {
+              bmp.bd.setUint8(widx++, bd.getUint8(ridx++));
+            }
+          }
+          break;
+        case Rotation.ROTATION_90:
+        default:
+          bmp = BMP8Header(cameraImage.height, cameraImage.width);
+          for (num row = 0; row < bmp.height; row++) {
+            num ridx = row + cameraImage.planes[0].bytesPerRow * (cameraImage.height - 1);
+            for (num col = 0; col < bmp.width; col++) {
+              bmp.bd.setUint8(widx++, bd.getUint8(ridx));
+              ridx -= cameraImage.planes[0].bytesPerRow;
+            }
+          }
+          break;
       }
       _queue.sink.add(bmp.list);
     }

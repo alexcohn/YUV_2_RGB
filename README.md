@@ -52,6 +52,11 @@ Here are the results for 3 different physical devices tested:
   * *medium*: 720x480 Image.fromBytes **70** ms; encodeJpeg **210** ms (after patch)
   * *high*: 1280x720 Image.fromBytes **110** ms; encodeJpeg **530** ms
 
+ * Nokia 4.2 luminance only via a 8-byte bmp, in dart with ByteData:
+  * *medium*: 720x480 **40** ms (without rotation, using iterator)
+  * *medium*: 720x480 **36** ms (without rotation), **49** ms (with rotation)
+  * *high*: 1280x720 **60** ms (without rotation), **87** ms (with rotation)
+
 * Redmi Note 4:
   * *Low quality*: **~0.03-0.06** Seconds.
   * *Medium quality*: **~0.1-0.14** Seconds.

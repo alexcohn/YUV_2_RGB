@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:yuvtransform/camera_handler.dart';
-import 'package:yuvtransform/service/image_result_processor_service.dart';
 
 import 'camera_screen.dart';
+import 'camera_handler.dart';
+import 'service/image_result_processor_service.dart';
+import 'method_channelling/yuv_chanelling.dart';
 
 /// Delay for image capture in stream. Should properly be in some sort of SettingsManager in a real project.
 const DELAY_TIME = 3000;
@@ -21,7 +22,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
   List<StreamSubscription> _subscription = List();
   ImageResultProcessorService _imageResultProcessorService;
   bool _isProcessing = false;
-  var _capturedImage = new Image();
+  Image _capturedImage;
 
   @override
   void initState() {
@@ -108,7 +109,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     _isProcessing = true;
     print("Sent a new image and sleeping for: $DELAY_TIME");
     await Future.delayed(Duration(milliseconds: DELAY_TIME),
-        () => _imageResultProcessorService.addRawImage(image));
+        () => _imageResultProcessorService.addCameraImage(image, compress: false, luminanceOnly: true, rotation: Rotation.ROTATION_0));
   }
 
   @override
