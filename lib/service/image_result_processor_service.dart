@@ -22,17 +22,15 @@ class ImageResultProcessorService  {
     num newTimeStamp = DateTime.now().millisecondsSinceEpoch;
     if (luminanceOnly) {
       BMP8Header bmp;
-      int widx = 0;
+      ByteData bd = cameraImage.planes[0].bytes.buffer.asByteData(cameraImage.planes[0].bytes.offsetInBytes);
+      num widx = 0;
 
-      var it = cameraImage.planes[0].bytes.iterator;
+      num ridx = cameraImage.planes[0].bytes.offsetInBytes;
       bmp = BMP8Header(cameraImage.width, cameraImage.height);
       for (num row = 0; row < bmp.height; row++) {
+        num ridx = row * cameraImage.planes[0].bytesPerRow;
         for (num col = 0; col < bmp.width; col++) {
-          it.moveNext();
-          bmp.bd.setUint8(widx++, it.current);
-        }
-        for (num col = bmp.width; col < cameraImage.planes[0].bytesPerRow; col++) {
-          it.moveNext();
+          bmp.bd.setUint8(widx++, bd.getUint8(ridx++));
         }
       }
       _queue.sink.add(bmp.list);
