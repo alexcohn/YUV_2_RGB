@@ -109,7 +109,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
     _isProcessing = true;
     print("Sent a new image and sleeping for: $DELAY_TIME");
     await Future.delayed(Duration(milliseconds: DELAY_TIME),
-        () => _imageResultProcessorService.addCameraImage(image, compress: false, luminanceOnly: true, rotation: Rotation.ROTATION_0));
+        () => _imageResultProcessorService.addCameraImage(image, compress: false, luminanceOnly: false, rotation: Rotation.ROTATION_90));
   }
 
   @override

@@ -57,6 +57,10 @@ Here are the results for 3 different physical devices tested:
   * *medium*: 720x480 **36** ms (without rotation), **49** ms (with rotation)
   * *high*: 1280x720 **60** ms (without rotation), **87** ms (with rotation)
 
+ * Nokia 4.2 uncompressed 32-bit bmp:
+  * *medium*: 720x480 yuv->rgb: **11** ms; to bmp **2** ms; overall in Flutter **42** ms
+  * *high*: 1280x720 yuv->rgb: **15** ms; to bmp **5** ms; overall in Flutter **70** ms
+
 * Redmi Note 4:
   * *Low quality*: **~0.03-0.06** Seconds.
   * *Medium quality*: **~0.1-0.14** Seconds.
