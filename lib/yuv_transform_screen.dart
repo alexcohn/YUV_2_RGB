@@ -22,7 +22,7 @@ class _YuvTransformScreenState extends State<YuvTransformScreen>
   List<StreamSubscription> _subscription = List();
   ImageResultProcessorService _imageResultProcessorService;
   bool _isProcessing = false;
-  Image _capturedImage;
+  var _capturedImage = Image();
 
   @override
   void initState() {

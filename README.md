@@ -54,6 +54,8 @@ Here are the results for 3 different physical devices tested:
 
  * Nokia 4.2 luminance only via a 8-byte bmp, in dart with ByteData:
   * *medium*: 720x480 **40** ms (without rotation, using iterator)
+  * *medium*: 720x480 **2** ms (without rotation, padding) - this adds a black stripe of 48 pixels
+  * *high*: 1280x720 **3** ms (without rotation, padding)
   * *medium*: 720x480 **36** ms (without rotation), **49** ms (with rotation)
   * *high*: 1280x720 **60** ms (without rotation), **87** ms (with rotation)
 

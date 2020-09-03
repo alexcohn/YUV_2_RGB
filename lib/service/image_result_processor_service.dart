@@ -22,21 +22,27 @@ class ImageResultProcessorService  {
     num newTimeStamp = DateTime.now().millisecondsSinceEpoch;
     if (luminanceOnly) {
       BMP8Header bmp;
-      ByteData bd = cameraImage.planes[0].bytes.buffer.asByteData(cameraImage.planes[0].bytes.offsetInBytes);
-      num widx = 0;
 
       switch (rotation) {
         case Rotation.ROTATION_0:
           bmp = BMP8Header(cameraImage.width, cameraImage.height);
-          for (num row = 0; row < bmp.height; row++) {
-            num ridx = row * cameraImage.planes[0].bytesPerRow;
-            for (num col = 0; col < bmp.width; col++) {
-              bmp.bd.setUint8(widx++, bd.getUint8(ridx++));
+          if (cameraImage.planes[0].bytesPerRow == cameraImage.width) {
+            bmp.list.setAll(bmp._totalHeaderSize, cameraImage.planes[0].bytes);
+          } else {
+            ByteData bd = cameraImage.planes[0].bytes.buffer.asByteData(cameraImage.planes[0].bytes.offsetInBytes);
+            num widx = 0;
+            for (num row = 0; row < bmp.height; row++) {
+              num ridx = row * cameraImage.planes[0].bytesPerRow;
+              for (num col = 0; col < bmp.width; col++) {
+                bmp.bd.setUint8(widx++, bd.getUint8(ridx++));
+              }
             }
           }
           break;
         case Rotation.ROTATION_90:
         default:
+          ByteData bd = cameraImage.planes[0].bytes.buffer.asByteData(cameraImage.planes[0].bytes.offsetInBytes);
+          num widx = 0;
           bmp = BMP8Header(cameraImage.height, cameraImage.width);
           for (num row = 0; row < bmp.height; row++) {
             num ridx = row + cameraImage.planes[0].bytesPerRow * (cameraImage.height - 1);
@@ -75,7 +81,7 @@ class BMP8Header {
   BMP8Header(this.width, this.height) : assert(width & 3 == 0) {
     int baseHeaderSize = 54;
     _totalHeaderSize = baseHeaderSize + 1024; // base + color map
-    int fileLength = _totalHeaderSize + width * height * 3; // header + bitmap
+    int fileLength = _totalHeaderSize + width * height; // header + bitmap
     list = new Uint8List(fileLength);
     bd = list.buffer.asByteData(0, _totalHeaderSize);
     bd.setUint8(0, 0x42);
